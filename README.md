@@ -3,8 +3,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![DOI](https://img.shields.io/badge/DOI-10.xxxx%2Fxxxx-blue)](https://doi.org/10.xxxx/xxxx)
 
+](https://doi.org/10.5281/zenodo.17515815)
 **Quantique-Philologique-Bayésien (QPB) Framework pour l'Analyse Musicologique Computationnelle**
 
 Framework rigoureux et reproductible pour l'analyse de motifs musicaux intentionnels, combinant méthodes statistiques classiques, inférence bayésienne et algorithmes quantiques pour la musicologie numérique.
