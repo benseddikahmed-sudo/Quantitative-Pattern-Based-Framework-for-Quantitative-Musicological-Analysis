@@ -31,7 +31,7 @@ Author: Benseddik Ahmed
 Repository: https://github.com/benseddikahmed-sudo/Universal-Musicological-Analysis-Framework
 Version: 4.0 (Integrated)
 License: MIT with Mandatory Attribution
-DOI: [To be generated via Zenodo]
+DOI: https://doi.org/10.5281/zenodo.17515815
 
 Key Dependencies:
     numpy>=1.21.0, scipy>=1.7.0, pandas>=1.3.0, librosa>=0.9.0,
