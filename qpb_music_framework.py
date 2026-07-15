@@ -898,7 +898,7 @@ class HarmonicContrapuntalAnalyzer:
         except Exception:
             return pd.DataFrame()
 
-        for c in chordified.recurse().getElementsByClass('Chord'):
+        for c in chordified.flatten().getElementsByClass('Chord'):
             if len(c.pitches) == 0:
                 continue
 
@@ -965,6 +965,47 @@ class HarmonicContrapuntalAnalyzer:
     # Blue notes
     # ------------------------------------------------------------------
 
+    def detect_augmented_second_ratio(self) -> float:
+        """
+        Proportion of consecutive melodic steps (within a single voice)
+        that form a genuine augmented 2nd -- distinctive of Hijaz-family
+        maqamat and related modes.
+
+        IMPORTANT: an augmented 2nd and a minor 3rd are both 3 semitones
+        apart, so they are indistinguishable by raw MIDI/semitone
+        difference alone. This uses music21's pitch-spelling-aware
+        interval.Interval (generic + chromatic) to tell them apart --
+        an earlier semitone-only version falsely fired on blues melodies
+        (minor-third blue-note motion), which was caught by testing.
+        """
+        notes = [n for n in self.score.parts[0].flatten().notes] if \
+            hasattr(self.score, 'parts') and len(self.score.parts) > 0 else \
+            list(self.score.flatten().notes)
+
+        if len(notes) < 2:
+            return 0.0
+
+        aug_second_count = 0
+        step_count = 0
+
+        for i in range(1, len(notes)):
+            prev_pitches = notes[i - 1].pitches if notes[i - 1].isChord else [notes[i - 1].pitch]
+            curr_pitches = notes[i].pitches if notes[i].isChord else [notes[i].pitch]
+
+            if prev_pitches[0].midi == curr_pitches[0].midi:
+                continue
+
+            step_count += 1
+            try:
+                ivl = interval.Interval(prev_pitches[0], curr_pitches[0])
+                # Augmented 2nd, ascending or descending
+                if ivl.simpleName in ('A2', 'AA1'):
+                    aug_second_count += 1
+            except Exception:
+                continue
+
+        return aug_second_count / step_count if step_count else 0.0
+
     def detect_blue_notes_context(self) -> Dict[str, Any]:
         """
         Detect flat-3, flat-5, and flat-7 scale degrees against the
@@ -988,7 +1029,7 @@ class HarmonicContrapuntalAnalyzer:
                           6: 'flat_fifth (blue 5th)',
                           10: 'flat_seventh (blue 7th)'}
 
-        all_notes = list(self.score.recurse().notes)
+        all_notes = list(self.score.flatten().notes)
         total_notes = 0
 
         for n in all_notes:
@@ -1028,7 +1069,7 @@ class HarmonicContrapuntalAnalyzer:
 
         chordified = self.score.chordify()
         rn_sequence = []
-        for c in chordified.recurse().getElementsByClass('Chord'):
+        for c in chordified.flatten().getElementsByClass('Chord'):
             try:
                 rn = roman.romanNumeralFromChord(c, self.key)
                 rn_sequence.append((c.offset, c.measureNumber, rn))
@@ -1073,7 +1114,7 @@ class HarmonicContrapuntalAnalyzer:
     def analyze_harmonic_rhythm(self) -> Dict[str, Any]:
         """Average time (in quarter notes) between harmonic changes."""
         chordified = self.score.chordify()
-        offsets = [c.offset for c in chordified.recurse().getElementsByClass('Chord')]
+        offsets = [c.offset for c in chordified.flatten().getElementsByClass('Chord')]
 
         if len(offsets) < 2:
             return {'mean_duration_qn': None, 'interpretation': 'Insufficient data'}
@@ -1107,7 +1148,7 @@ class HarmonicContrapuntalAnalyzer:
         for idx, part in enumerate(parts):
             name = part.partName or f"Voice {idx + 1}"
             offset_map = {}
-            for n in part.recurse().notes:
+            for n in part.flatten().notes:
                 pitches = n.pitches if n.isChord else [n.pitch]
                 offset_map[float(n.offset)] = max(p.midi for p in pitches)
             voice_maps[name] = offset_map
@@ -1205,7 +1246,7 @@ class HarmonicContrapuntalAnalyzer:
 
         rhythm_signatures = []
         for part in parts:
-            offsets = tuple(round(float(n.offset), 2) for n in part.recurse().notes)
+            offsets = tuple(round(float(n.offset), 2) for n in part.flatten().notes)
             rhythm_signatures.append(offsets)
 
         if len(set(rhythm_signatures)) == 1:
@@ -1235,7 +1276,7 @@ class HarmonicContrapuntalAnalyzer:
         "syncopation"). Only true subdivision-level offbeats (< 0.25)
         are counted here.
         """
-        notes = list(self.score.recurse().notes)
+        notes = list(self.score.flatten().notes)
         if not notes:
             return 0.0
 
@@ -1301,6 +1342,7 @@ class HarmonicContrapuntalAnalyzer:
         harmonic_rhythm = self.analyze_harmonic_rhythm()
         texture = self.analyze_texture()
         syncopation_ratio = self.compute_syncopation_ratio()
+        augmented_second_ratio = self.detect_augmented_second_ratio()
 
         historical_attribution = {}
         if self.acknowledge_influences:
@@ -1316,6 +1358,7 @@ class HarmonicContrapuntalAnalyzer:
             'voice_leading': df_voice_leading,
             'parallel_motion': parallel_motion,
             'blue_notes': blue_notes,
+            'augmented_second_ratio': augmented_second_ratio,
             'harmonic_rhythm': harmonic_rhythm,
             'texture': texture,
             'syncopation_ratio': syncopation_ratio,
@@ -1632,6 +1675,19 @@ def _ninth_chord_ratio(analysis_results: Dict[str, Any]) -> float:
     return float(df['has_ninth'].mean())
 
 
+def _nonfunctional_harmony_ratio(analysis_results: Dict[str, Any]) -> float:
+    """
+    Proportion of harmonic events classified as 'Other' function
+    (neither clearly Tonic, Subdominant, nor Dominant) -- a rough proxy
+    for modal/non-functional harmony (parallel planing chords, quartal
+    harmony, etc.) as opposed to classical tonal harmony.
+    """
+    df = analysis_results.get('harmony', pd.DataFrame())
+    if df is None or len(df) == 0 or 'function' not in df:
+        return 0.0
+    return float((df['function'] == 'Other').mean())
+
+
 class UniversalInfluenceDetector:
     """
     Detects potential historical influences from Module 8 analysis results.
@@ -1647,6 +1703,7 @@ class UniversalInfluenceDetector:
     DETECTION_RULES: Dict[str, Dict[str, Any]] = {
         'african_diasporic_blues_jazz': {
             'registry_keyword': 'African-American',
+            'min_markers': 2,
             'checks': [
                 (lambda r: r.get('blue_notes', {}).get('total_occurrences', 0) > 0, 0.4, 'blue_notes'),
                 (lambda r: r.get('syncopation_ratio', 0) > 0.35, 0.3, 'high_syncopation'),
@@ -1656,6 +1713,7 @@ class UniversalInfluenceDetector:
         },
         'jazz_influence_on_classical': {
             'registry_keyword': 'Jazz',
+            'min_markers': 2,
             'checks': [
                 (lambda r: r.get('blue_notes', {}).get('total_occurrences', 0) > 0, 0.35, 'blue_notes'),
                 (lambda r: _ninth_chord_ratio(r) > 0.15, 0.35, 'dense_ninth_chords'),
@@ -1665,18 +1723,31 @@ class UniversalInfluenceDetector:
         },
         'arabic_andalusian': {
             'registry_keyword': 'Arabic',
+            'min_markers': 2,
             'checks': [
-                (lambda r: r.get('key', '').lower().endswith('minor'), 0.15, 'modal_ambiguity'),
-                (lambda r: r.get('texture') == 'monophonic', 0.35, 'monophonic_melismatic_texture'),
+                (lambda r: r.get('augmented_second_ratio', 0) > 0.1, 0.5, 'augmented_second_motion'),
                 (lambda r: r.get('blue_notes', {}).get('patterns', {}).get(
-                    'flat_third (blue 3rd)', 0) > 0, 0.2, 'lowered_third'),
+                    'flat_third (blue 3rd)', 0) > 0, 0.3, 'lowered_third'),
+                (lambda r: r.get('texture') == 'monophonic', 0.15, 'monophonic_texture_supporting'),
             ]
         },
         'latin_caribbean': {
             'registry_keyword': 'Cuban',
+            'min_markers': 2,
             'checks': [
                 (lambda r: r.get('syncopation_ratio', 0) > 0.5, 0.5, 'very_high_syncopation'),
-                (lambda r: len(r.get('parallel_motion', [])) > 3, 0.2, 'frequent_parallel_voicings'),
+                (lambda r: len(r.get('parallel_motion', [])) > 3, 0.3, 'frequent_parallel_voicings'),
+                (lambda r: _seventh_chord_ratio(r) > 0.30, 0.2, 'dense_seventh_chords'),
+            ]
+        },
+        'gamelan_impressionism': {
+            'registry_keyword': 'Gamelan',
+            'min_markers': 2,
+            'checks': [
+                (lambda r: len(r.get('parallel_motion', [])) > 3, 0.4, 'frequent_parallel_motion'),
+                (lambda r: r.get('texture') == 'homophonic', 0.3, 'stratified_homophonic_texture'),
+                (lambda r: r.get('harmonic_rhythm', {}).get('mean_duration_qn') is not None
+                          and r['harmonic_rhythm']['mean_duration_qn'] >= 1.0, 0.2, 'sustained_harmonic_rhythm'),
             ]
         },
     }
@@ -1710,8 +1781,9 @@ class UniversalInfluenceDetector:
                     continue
 
             confidence = min(confidence, 1.0)
+            min_markers = rule.get('min_markers', 1)
 
-            if confidence >= 0.3 and markers:
+            if confidence >= 0.3 and len(markers) >= min_markers:
                 if confidence > 0.7:
                     interpretation = "Strong indicators of influence"
                 elif confidence > 0.5:
