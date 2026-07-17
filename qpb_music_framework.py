@@ -28,7 +28,7 @@ CORE PRINCIPLES:
 - Open Science: Transparent methods, reproducible results, community input
 
 Author: Benseddik Ahmed
-Repository: https://github.com/benseddikahmed-sudo/Universal-Musicological-Analysis-Framework
+Repository: https://github.com/benseddikahmed-sudo/Quantitative-Pattern-Based-Framework-for-Quantitative-Musicological-Analysis
 Version: 4.0 (Integrated)
 License: MIT with Mandatory Attribution
 DOI: https://doi.org/10.5281/zenodo.17515815
@@ -42,7 +42,7 @@ Citation:
     Benseddik, A. (2025). Quantitative Pattern-Based Framework for 
     Universal Musicological Analysis: An Ethical Approach to Computational 
     Music Analysis with Historical Attribution. GitHub repository.
-    https://github.com/benseddikahmed-sudo/Universal-Musicological-Analysis-Framework
+    https://github.com/benseddikahmed-sudo/Quantitative-Pattern-Based-Framework-for-Quantitative-Musicological-Analysis
 
 Academic References:
     Floyd, S. A. (1995). The Power of Black Music. Oxford University Press.
@@ -98,7 +98,7 @@ warnings.filterwarnings('ignore')
 
 __author__ = "Benseddik Ahmed"
 __version__ = "4.0"
-__repository__ = "https://github.com/benseddikahmed-sudo/Universal-Musicological-Analysis-Framework"
+__repository__ = "https://github.com/benseddikahmed-sudo/Quantitative-Pattern-Based-Framework-for-Quantitative-Musicological-Analysis"
 
 
 # ============================================================================

@@ -1,0 +1,47 @@
+MIT License with Mandatory Attribution
+
+Copyright (c) 2025 Benseddik Ahmed
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to
+deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+1. The above copyright notice and this permission notice shall be included
+   in all copies or substantial portions of the Software.
+
+2. MANDATORY ATTRIBUTION. Any use, reproduction, distribution, or derivative
+   work based on the Software — in academic publications, software
+   repositories, datasets, or any other medium — must include a clear and
+   explicit citation of the original work:
+
+       Benseddik, A. (2025). Quantitative Pattern-Based Framework for
+       Universal Musicological Analysis: An Ethical Approach to
+       Computational Music Analysis with Historical Attribution.
+       GitHub repository.
+       https://github.com/benseddikahmed-sudo/Quantitative-Pattern-Based-Framework-for-Quantitative-Musicological-Analysis
+       DOI: https://doi.org/10.5281/zenodo.17515815
+
+   This attribution requirement applies in addition to, and independently
+   of, the standard MIT copyright notice requirement above. Removing,
+   obscuring, or omitting this attribution in any redistribution or
+   derivative work constitutes a violation of this license.
+
+3. ETHICAL USE NOTICE. This Software implements a historical and cultural
+   attribution framework for musicological analysis, informed by the
+   ethical principles described in its documentation (historical
+   attribution, epistemic humility, collaborative imperative, decolonial
+   methodology, open science). Users are encouraged, though not legally
+   required, to uphold these principles — in particular, to seek
+   collaboration with relevant cultural experts when applying this
+   Software to non-Western musical traditions.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
